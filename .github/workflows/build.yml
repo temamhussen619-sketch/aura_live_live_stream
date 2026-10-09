@@ -21,6 +21,10 @@ jobs:
           flutter-version: '3.19.6'
           cache: true
 
+      # የጎደሉትን የአንድሮይድ ፋይሎች በራሱ እንዲፈጥር ማድረግ
+      - name: Create Android files if missing
+        run: flutter create . --platforms=android --org com.example.auralive
+
       - run: flutter pub get
 
       - run: flutter build apk --release
