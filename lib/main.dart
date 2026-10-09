@@ -78,7 +78,6 @@ class _LiveStreamHomePageState extends State<LiveStreamHomePage> {
     return Scaffold(
       body: Stack(
         children: [
-          // የካሜራ ፕሪቪው (ላይቭ ስትሪም ቪዲዮ)
           Positioned.fill(
             child: _isCameraInitialized && _controller != null
                 ? CameraPreview(_controller!)
@@ -89,7 +88,6 @@ class _LiveStreamHomePageState extends State<LiveStreamHomePage> {
                     ),
                   ),
           ),
-          // የላይቭ ሩም ዩአይ (UI Overlay)
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.all(16.0),
@@ -133,9 +131,9 @@ class _LiveStreamHomePageState extends State<LiveStreamHomePage> {
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                         decoration: BoxDecoration(
                           color: Colors.red,
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.all(Radius.circular(12)),
                         ),
-                        const Text(
+                        child: const Text(
                           '🔴 LIVE',
                           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12),
                         ),
