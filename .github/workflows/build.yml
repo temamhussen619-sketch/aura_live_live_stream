@@ -21,8 +21,11 @@ jobs:
           flutter-version: '3.19.6'
           cache: true
 
-      - name: Create Android files if missing
-        run: flutter create . --platforms=android --org com.example.auralive --project-name aura_live_stream
+      - name: Create Android files with minSdk 21
+        run: |
+          flutter create . --platforms=android --org com.example.auralive --project-name aura_live_stream
+          # build.gradle ውስጥ minSdkVersion 21 እንዲሆን ማድረግ
+          sed -i 's/minSdkVersion flutter.minSdkVersion/minSdkVersion 21/g' android/app/build.gradle
 
       - run: flutter pub get
 
