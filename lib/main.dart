@@ -206,7 +206,7 @@ class _LiveRoomPageState extends State<LiveRoomPage> {
                     _ToolItem(icon: Icons.work, label: "Bag", color: Colors.blue),
                     _ToolItem(icon: Icons.collections, label: "Gift Gallery", color: Colors.cyan),
                     _ToolItem(icon: Icons.all_inclusive, label: "Lucky Box", color: Colors.orangeAccent),
-                    _ToolItem(icon: Icons.auto_awesome_motion, label: "Collection", color: Colors.magenta),
+                    _ToolItem(icon: Icons.auto_awesome_motion, label: "Collection", color: Colors.purpleAccent),
                     _ToolItem(icon: Icons.auto_awesome, label: "Gift Wish", color: Colors.amberAccent),
                   ],
                 ),
