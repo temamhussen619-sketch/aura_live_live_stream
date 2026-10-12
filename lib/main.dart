@@ -274,7 +274,15 @@ class _HomeLiveDiscoveryPageState extends State<HomeLiveDiscoveryPage> {
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                         ),
                         onPressed: () {
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => const LiveRoomPage()));
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => LiveRoomPage(
+                                hostTitle: _titleController.text,
+                                coverImage: _selectedCoverImage,
+                              ),
+                            ),
+                          );
                         },
                         child: const Text("Go Live", style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
                       ),
@@ -384,7 +392,7 @@ class _BeautySettingsSheetState extends State<BeautySettingsSheet> {
 }
 
 // ---------------------------------------------------------------------------
-// 3. ADVANCED OPTIONS MENU (1ኛው ጥያቄ: ሙሉ በሙሉ የማይቆረጥ እና የሚታይ)
+// 3. ADVANCED OPTIONS MENU (1ኛው ጥያቄ: አማራጮቹ ሲነኩ እንዲከፍቱ የተደረገ)
 // ---------------------------------------------------------------------------
 class AdvancedOptionsMenu extends StatelessWidget {
   const AdvancedOptionsMenu({super.key});
@@ -445,22 +453,64 @@ class AdvancedOptionsMenu extends StatelessWidget {
               ListTile(
                 title: const Text("Key room", style: TextStyle(color: Colors.white, fontSize: 13)),
                 trailing: const Icon(Icons.arrow_forward_ios, color: Colors.white54, size: 14),
-                onTap: () {},
+                onTap: () {
+                  Navigator.pop(context);
+                  _showSubSettingModal(context, "Key room Settings");
+                },
               ),
               ListTile(
                 title: const Text("Live Stream quality", style: TextStyle(color: Colors.white, fontSize: 13)),
                 trailing: const Icon(Icons.arrow_forward_ios, color: Colors.white54, size: 14),
-                onTap: () {},
+                onTap: () {
+                  Navigator.pop(context);
+                  _showSubSettingModal(context, "Live Stream Quality Settings");
+                },
               ),
               ListTile(
                 title: const Text("Live Stream Introduction", style: TextStyle(color: Colors.white, fontSize: 13)),
                 trailing: const Icon(Icons.arrow_forward_ios, color: Colors.white54, size: 14),
-                onTap: () {},
+                onTap: () {
+                  Navigator.pop(context);
+                  _showSubSettingModal(context, "Live Stream Introduction");
+                },
               ),
               ListTile(
                 title: const Text("Speech Setting", style: TextStyle(color: Colors.white, fontSize: 13)),
                 trailing: const Icon(Icons.arrow_forward_ios, color: Colors.white54, size: 14),
-                onTap: () {},
+                onTap: () {
+                  Navigator.pop(context);
+                  _showSubSettingModal(context, "Speech Settings");
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _showSubSettingModal(BuildContext context, String title) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: const Color(0xFF161823),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return Container(
+          padding: const EdgeInsets.all(24),
+          height: 250,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(title, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 20),
+              const Text("እዚህጋ ማስተካከያዎችን ማድረግ ይቻላል...", style: TextStyle(color: Colors.white70, fontSize: 14)),
+              const Spacer(),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.pinkAccent, minimumSize: const Size(double.infinity, 45)),
+                onPressed: () => Navigator.pop(context),
+                child: const Text("ተመለስ", style: TextStyle(color: Colors.white)),
               ),
             ],
           ),
@@ -474,7 +524,14 @@ class AdvancedOptionsMenu extends StatelessWidget {
 // 4. ACTIVE LIVE ROOM PAGE
 // ---------------------------------------------------------------------------
 class LiveRoomPage extends StatefulWidget {
-  const LiveRoomPage({super.key});
+  final String hostTitle;
+  final File? coverImage;
+
+  const LiveRoomPage({
+    super.key,
+    required this.hostTitle,
+    this.coverImage,
+  });
 
   @override
   State<LiveRoomPage> createState() => _LiveRoomPageState();
@@ -486,6 +543,7 @@ class _LiveRoomPageState extends State<LiveRoomPage> {
 
   Timer? _liveTimer;
   int _secondsElapsed = 0;
+  bool _isFollowing = false;
 
   @override
   void initState() {
@@ -498,6 +556,12 @@ class _LiveRoomPageState extends State<LiveRoomPage> {
     _liveTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (mounted) setState(() => _secondsElapsed++);
     });
+  }
+
+  String _formatDuration(int totalSeconds) {
+    int minutes = totalSeconds ~/ 60;
+    int seconds = totalSeconds % 60;
+    return "${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}";
   }
 
   Future<void> _initLiveCamera() async {
@@ -515,6 +579,32 @@ class _LiveRoomPageState extends State<LiveRoomPage> {
     super.dispose();
   }
 
+  // ❌ ሲነካ የማረጋገጫ (Yes/No) ፖፕ-አፕ
+  void _confirmEndLive() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF161823),
+        title: const Text("End Live Stream?", style: TextStyle(color: Colors.white, fontSize: 16)),
+        content: const Text("እርግጠኛ ኖት ላይቩን ማጥፋት ይፈልጋሉ?", style: TextStyle(color: Colors.white70, fontSize: 13)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("No", style: TextStyle(color: Colors.white54)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.pinkAccent),
+            onPressed: () {
+              Navigator.pop(context);
+              Navigator.pop(context);
+            },
+            child: const Text("Yes", style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _showProfileDetailsModal() {
     showModalBottomSheet(
       context: context,
@@ -529,21 +619,22 @@ class _LiveRoomPageState extends State<LiveRoomPage> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const CircleAvatar(
+              CircleAvatar(
                 radius: 42,
                 backgroundColor: Colors.amber,
-                child: Icon(Icons.person, size: 45, color: Colors.black),
+                backgroundImage: widget.coverImage != null ? FileImage(widget.coverImage!) : null,
+                child: widget.coverImage == null ? const Icon(Icons.person, size: 45, color: Colors.black) : null,
               ),
               const SizedBox(height: 12),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: const [
+                children: [
                   Text(
-                    "Alpha Motivation",
-                    style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                    widget.hostTitle.isNotEmpty ? widget.hostTitle : "Live Host",
+                    style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
                   ),
-                  SizedBox(width: 6),
-                  Text("🇪🇹", style: TextStyle(fontSize: 18)),
+                  const SizedBox(width: 6),
+                  const Text("🇪🇹", style: TextStyle(fontSize: 18)),
                 ],
               ),
               const SizedBox(height: 6),
@@ -590,9 +681,9 @@ class _LiveRoomPageState extends State<LiveRoomPage> {
       ),
       builder: (context) {
         return DraggableScrollableSheet(
-          initialChildSize: 0.65,
-          maxChildSize: 0.85,
-          minChildSize: 0.4,
+          initialChildSize: 0.75,
+          maxChildSize: 0.95,
+          minChildSize: 0.5,
           expand: false,
           builder: (context, scrollController) {
             return ListView(
@@ -644,6 +735,28 @@ class _LiveRoomPageState extends State<LiveRoomPage> {
                     _ToolItem(icon: Icons.flip, label: "Mirror", color: Colors.indigo),
                   ],
                 ),
+                const SizedBox(height: 24),
+                const Text("Features Center", style: TextStyle(color: Colors.white70, fontSize: 15, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 12),
+                GridView.count(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  crossAxisCount: 4,
+                  mainAxisSpacing: 12,
+                  crossAxisSpacing: 12,
+                  childAspectRatio: 0.82,
+                  children: const [
+                    _ToolItem(icon: Icons.military_tech, label: "Rank", color: Colors.amber),
+                    _ToolItem(icon: Icons.bolt, label: "PK", color: Colors.orangeAccent),
+                    _ToolItem(icon: Icons.monetization_on, label: "Rewards", color: Colors.yellow),
+                    _ToolItem(icon: Icons.store, label: "Store", color: Colors.red),
+                    _ToolItem(icon: Icons.diamond, label: "VIP", color: Colors.purpleAccent),
+                    _ToolItem(icon: Icons.card_giftcard, label: "Gift Center", color: Colors.pink),
+                    _ToolItem(icon: Icons.cases, label: "Bag", color: Colors.blue),
+                    _ToolItem(icon: Icons.photo_library, label: "Gift Gallery", color: Colors.cyan),
+                  ],
+                ),
+                const SizedBox(height: 30),
               ],
             );
           },
@@ -661,45 +774,108 @@ class _LiveRoomPageState extends State<LiveRoomPage> {
           _isCameraInitialized && _cameraController != null
               ? CameraPreview(_cameraController!)
               : const Center(child: CircularProgressIndicator(color: Colors.pinkAccent)),
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-              child: Row(
-                children: [
-                  GestureDetector(
-                    onTap: _showProfileDetailsModal,
-                    child: Container(
+
+          // Top Header Bar
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
+                child: Row(
+                  children: [
+                    GestureDetector(
+                      onTap: _showProfileDetailsModal,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: Colors.black54,
+                          borderRadius: BorderRadius.circular(25),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            CircleAvatar(
+                              radius: 16,
+                              backgroundColor: Colors.amber,
+                              backgroundImage: widget.coverImage != null ? FileImage(widget.coverImage!) : null,
+                              child: widget.coverImage == null ? const Icon(Icons.person, size: 18, color: Colors.black) : null,
+                            ),
+                            const SizedBox(width: 6),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  widget.hostTitle.isNotEmpty ? widget.hostTitle : "Host Live",
+                                  style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                Row(
+                                  children: [
+                                    const Icon(Icons.favorite, color: Colors.redAccent, size: 10),
+                                    const SizedBox(width: 2),
+                                    const Text("0", style: TextStyle(color: Colors.white70, fontSize: 10)),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      _formatDuration(_secondsElapsed),
+                                      style: const TextStyle(color: Colors.amber, fontSize: 10, fontWeight: FontWeight.bold),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                            const SizedBox(width: 8),
+                            GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  _isFollowing = !_isFollowing;
+                                });
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: _isFollowing ? Colors.white24 : Colors.pinkAccent,
+                                  borderRadius: BorderRadius.circular(15),
+                                ),
+                                child: Text(
+                                  _isFollowing ? "Following" : "+ Follow",
+                                  style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const Spacer(),
+                    Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: Colors.black54,
-                        borderRadius: BorderRadius.circular(20),
+                        color: Colors.black45,
+                        borderRadius: BorderRadius.circular(15),
                       ),
                       child: Row(
-                        mainAxisSize: MainAxisSize.min,
                         children: const [
-                          CircleAvatar(
-                            radius: 14,
-                            backgroundColor: Colors.amber,
-                            child: Icon(Icons.person, size: 16, color: Colors.black),
-                          ),
-                          SizedBox(width: 6),
-                          Text(
-                            "Alpha Motivation",
-                            style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
-                          ),
+                          Icon(Icons.remove_red_eye, color: Colors.white, size: 14),
+                          SizedBox(width: 4),
+                          Text("1.2k", style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold)),
                         ],
                       ),
                     ),
-                  ),
-                  const Spacer(),
-                  IconButton(
-                    icon: const Icon(Icons.close, color: Colors.white, size: 26),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                ],
+                    const SizedBox(width: 6),
+                    IconButton(
+                      icon: const Icon(Icons.close, color: Colors.white, size: 26),
+                      onPressed: _confirmEndLive,
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
+
+          // Bottom Control Toolbar
           Positioned(
             left: 0,
             right: 0,
