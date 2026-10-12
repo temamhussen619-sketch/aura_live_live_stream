@@ -118,10 +118,8 @@ class _HomeLiveDiscoveryPageState extends State<HomeLiveDiscoveryPage> {
   void _openOptionsMenu() {
     showModalBottomSheet(
       context: context,
-      backgroundColor: const Color(0xFF161823),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
       builder: (context) => const AdvancedOptionsMenu(),
     );
   }
@@ -130,12 +128,11 @@ class _HomeLiveDiscoveryPageState extends State<HomeLiveDiscoveryPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
+        fit: StackFit.expand,
         children: [
-          Positioned.fill(
-            child: _isCameraReady && _previewCameraController != null
-                ? CameraPreview(_previewCameraController!)
-                : Container(color: Colors.black),
-          ),
+          _isCameraReady && _previewCameraController != null
+              ? CameraPreview(_previewCameraController!)
+              : Container(color: Colors.black),
           SafeArea(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -387,29 +384,88 @@ class _BeautySettingsSheetState extends State<BeautySettingsSheet> {
 }
 
 // ---------------------------------------------------------------------------
-// 3. ADVANCED OPTIONS MENU
+// 3. ADVANCED OPTIONS MENU (1ኛው ጥያቄ: ሙሉ በሙሉ የማይቆረጥ እና የሚታይ)
 // ---------------------------------------------------------------------------
 class AdvancedOptionsMenu extends StatelessWidget {
   const AdvancedOptionsMenu({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: SingleChildScrollView(
-        child: Container(
+    return DraggableScrollableSheet(
+      initialChildSize: 0.65,
+      maxChildSize: 0.85,
+      minChildSize: 0.4,
+      expand: false,
+      builder: (context, scrollController) {
+        return Container(
           padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
+          decoration: const BoxDecoration(
+            color: Color(0xFF161823),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: ListView(
+            controller: scrollController,
             children: [
-              const Text("Live Stream Settings", style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[600],
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
               const SizedBox(height: 15),
-              SwitchListTile(title: const Text("Allow audience to send Gifts?", style: TextStyle(color: Colors.white, fontSize: 13)), value: true, activeColor: Colors.pinkAccent, onChanged: (v) {}),
-              SwitchListTile(title: const Text("Invisible Spectators", style: TextStyle(color: Colors.white, fontSize: 13)), value: false, activeColor: Colors.pinkAccent, onChanged: (v) {}),
-              SwitchListTile(title: const Text("Allow Momi to speak?", style: TextStyle(color: Colors.white, fontSize: 13)), value: true, activeColor: Colors.pinkAccent, onChanged: (v) {}),
+              const Center(
+                child: Text(
+                  "Live Stream Settings",
+                  style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+              ),
+              const SizedBox(height: 15),
+              SwitchListTile(
+                title: const Text("Allow audience to send Gifts?", style: TextStyle(color: Colors.white, fontSize: 13)),
+                value: true,
+                activeColor: Colors.pinkAccent,
+                onChanged: (v) {},
+              ),
+              SwitchListTile(
+                title: const Text("Invisible Spectators", style: TextStyle(color: Colors.white, fontSize: 13)),
+                value: false,
+                activeColor: Colors.pinkAccent,
+                onChanged: (v) {},
+              ),
+              SwitchListTile(
+                title: const Text("Allow Momi to speak?", style: TextStyle(color: Colors.white, fontSize: 13)),
+                value: true,
+                activeColor: Colors.pinkAccent,
+                onChanged: (v) {},
+              ),
+              ListTile(
+                title: const Text("Key room", style: TextStyle(color: Colors.white, fontSize: 13)),
+                trailing: const Icon(Icons.arrow_forward_ios, color: Colors.white54, size: 14),
+                onTap: () {},
+              ),
+              ListTile(
+                title: const Text("Live Stream quality", style: TextStyle(color: Colors.white, fontSize: 13)),
+                trailing: const Icon(Icons.arrow_forward_ios, color: Colors.white54, size: 14),
+                onTap: () {},
+              ),
+              ListTile(
+                title: const Text("Live Stream Introduction", style: TextStyle(color: Colors.white, fontSize: 13)),
+                trailing: const Icon(Icons.arrow_forward_ios, color: Colors.white54, size: 14),
+                onTap: () {},
+              ),
+              ListTile(
+                title: const Text("Speech Setting", style: TextStyle(color: Colors.white, fontSize: 13)),
+                trailing: const Icon(Icons.arrow_forward_ios, color: Colors.white54, size: 14),
+                onTap: () {},
+              ),
             ],
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
@@ -442,12 +498,6 @@ class _LiveRoomPageState extends State<LiveRoomPage> {
     _liveTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (mounted) setState(() => _secondsElapsed++);
     });
-  }
-
-  String _formatDuration(int totalSeconds) {
-    int minutes = totalSeconds ~/ 60;
-    int seconds = totalSeconds % 60;
-    return "${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}";
   }
 
   Future<void> _initLiveCamera() async {
@@ -530,16 +580,87 @@ class _LiveRoomPageState extends State<LiveRoomPage> {
     );
   }
 
+  void _openAllToolsGridMenu() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: const Color(0xFF161823).withOpacity(0.95),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return DraggableScrollableSheet(
+          initialChildSize: 0.65,
+          maxChildSize: 0.85,
+          minChildSize: 0.4,
+          expand: false,
+          builder: (context, scrollController) {
+            return ListView(
+              controller: scrollController,
+              padding: const EdgeInsets.all(16.0),
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(color: Colors.grey[600], borderRadius: BorderRadius.circular(2)),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                const Text("Host Tools", style: TextStyle(color: Colors.white70, fontSize: 15, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 12),
+                GridView.count(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  crossAxisCount: 4,
+                  mainAxisSpacing: 12,
+                  crossAxisSpacing: 12,
+                  childAspectRatio: 0.82,
+                  children: const [
+                    _ToolItem(icon: Icons.admin_panel_settings, label: "Admins", color: Colors.blue),
+                    _ToolItem(icon: Icons.chat_bubble, label: "Text Bubble", color: Colors.lightBlue),
+                    _ToolItem(icon: Icons.favorite, label: "Fan Club", color: Colors.pinkAccent),
+                    _ToolItem(icon: Icons.bar_chart, label: "Live Data", color: Colors.amber),
+                    _ToolItem(icon: Icons.star, label: "Management", color: Colors.orange),
+                    _ToolItem(icon: Icons.music_note, label: "Ambient Sound", color: Colors.purpleAccent),
+                    _ToolItem(icon: Icons.videocam, label: "Recording", color: Colors.redAccent),
+                    _ToolItem(icon: Icons.campaign, label: "Intro", color: Colors.teal),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                const Text("Basic Tools", style: TextStyle(color: Colors.white70, fontSize: 15, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 12),
+                GridView.count(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  crossAxisCount: 4,
+                  mainAxisSpacing: 12,
+                  crossAxisSpacing: 12,
+                  childAspectRatio: 0.82,
+                  children: const [
+                    _ToolItem(icon: Icons.email, label: "Message", color: Colors.blueAccent),
+                    _ToolItem(icon: Icons.cameraswitch, label: "Switch Cam", color: Colors.green),
+                    _ToolItem(icon: Icons.face, label: "Beauty", color: Colors.purple),
+                    _ToolItem(icon: Icons.flip, label: "Mirror", color: Colors.indigo),
+                  ],
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
+        fit: StackFit.expand,
         children: [
-          Positioned.fill(
-            child: _isCameraInitialized
-                ? CameraPreview(_cameraController!)
-                : const Center(child: CircularProgressIndicator(color: Colors.pinkAccent)),
-          ),
+          _isCameraInitialized && _cameraController != null
+              ? CameraPreview(_cameraController!)
+              : const Center(child: CircularProgressIndicator(color: Colors.pinkAccent)),
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
@@ -566,7 +687,6 @@ class _LiveRoomPageState extends State<LiveRoomPage> {
                             "Alpha Motivation",
                             style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
                           ),
-                          SizedBox(width: 4),
                         ],
                       ),
                     ),
@@ -580,6 +700,75 @@ class _LiveRoomPageState extends State<LiveRoomPage> {
               ),
             ),
           ),
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 12,
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _buildIconButton(Icons.chat_bubble_outline, Colors.white24, () {}),
+                    _buildIconButton(Icons.mic, Colors.white24, () {}),
+                    GestureDetector(
+                      onTap: _openAllToolsGridMenu,
+                      child: Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: const BoxDecoration(
+                          color: Colors.pinkAccent,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.grid_view_rounded, color: Colors.white, size: 26),
+                      ),
+                    ),
+                    _buildIconButton(Icons.sports_kabaddi, Colors.deepOrangeAccent, () {}),
+                    _buildIconButton(Icons.card_giftcard, Colors.pinkAccent, () {}),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildIconButton(IconData icon, Color bg, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(color: bg, shape: BoxShape.circle),
+        child: Icon(icon, color: Colors.white, size: 22),
+      ),
+    );
+  }
+}
+
+class _ToolItem extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color color;
+  final VoidCallback? onTap;
+
+  const _ToolItem({required this.icon, required this.label, required this.color, this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(color: color.withOpacity(0.2), shape: BoxShape.circle),
+            child: Icon(icon, color: color, size: 22),
+          ),
+          const SizedBox(height: 4),
+          Text(label, style: const TextStyle(color: Colors.white70, fontSize: 10)),
         ],
       ),
     );
